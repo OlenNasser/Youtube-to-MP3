@@ -5,12 +5,14 @@ from tkinter import *
 import tkinter as tk
 import os, sys
 
+#This is a simple GUI video downloader using pytube(fix) and tkinter
 
+#GUI stuff
 class MAIN:
     def __init__(self):
         pass
     def main(self):
-
+        #Default download location, gets updated when user changes it
         self.ddl = "C:\\Downloads\\"
 
         self.root = Tk()
@@ -23,6 +25,7 @@ class MAIN:
         rightframe = Frame(self.root)
         rightframe.pack(side=RIGHT)
         
+        #Title
         self.label = Label(self.frame, text = "oBoonkeros Video Downloader", font = ('Arial', 40))
         self.label.pack()
 
@@ -31,15 +34,17 @@ class MAIN:
     def setup(self):
         
         
-        
+        #Link input found at self.link
         self.linkLabel = Label(self.frame, text = 'Enter URL below', font = ('Arial', 20))
         self.linkLabel.pack()
         self.link = Entry (self.root, width = 25)
         self.link.pack(pady = 20)
 
+        #Button to get the link
         self.button = Button (self.root, width = 20, text = 'get', command = self.get)
         self.button.pack()
 
+        #Checkbox to select if the user wants to download a playlist or a single video
         self.playlist = tk.IntVar()
         self.checkbox = Checkbutton(self.root, text = 'Playlist', variable = self.playlist, onvalue=1, offvalue=0)
         self.checkbox.pack()
@@ -49,6 +54,7 @@ class MAIN:
 
     def get(self):
 
+        #System to remember the last download location
         try:
             self.file = open (os.getcwd() + '\\Directory.txt', 'r+')
             self.ddl = self.file.read()
@@ -59,6 +65,7 @@ class MAIN:
             self.file.write(self.ddl)
             self.file.close()
         
+        #Clearing the frame, probably not the best way to do it but it works
         self.linkLabel.pack_forget()
         self.button.pack_forget()
         self.link.pack_forget()
@@ -66,6 +73,8 @@ class MAIN:
 
         self.url = self.link.get()
 
+        #No idea why it was done like this but I don't want to touch it, this part hasn't been touched in years
+        # if the user wants to download a playlist or a single video it will display different information or let user know url is invalid
         if self.playlist.get()==0:
             try:
                 self.ytu = yt(self.url)
@@ -110,7 +119,7 @@ class MAIN:
                 self.location.insert(0, self.ddl)
                 self.location.pack()
             except:
-                self.title = Label(self.frame, text = "Invalid URL", font = ('Arial', 30))
+                self.title = Label(self.frame, text = "Invalid URL (Make sure playlist is public)", font = ('Arial', 30))
                 self.title.pack()
 
 
@@ -124,7 +133,7 @@ class MAIN:
 
         
         
-
+    #Actual download function via pytube(fix)
     def download(self):
         #self.ytu.streams.first().download(self.location.get())
 
@@ -132,11 +141,16 @@ class MAIN:
         self.file.truncate(0)
         self.file.write(self.location.get())
         self.file.close()
+        #If not playlist download video if it is download all videos via for loop running through the playlist
+        #Also downloads captions if available (functionality doesn't work on song lyrics as of now)
         if self.playlist.get()==0:
             url = self.url
             dir = self.location.get()
 
+            #Added use_oauth and allow_oauth_cache to handle OAuth authentication due to some issues with Youtube API calling for age restrictions but this can be removed if not needed as it is annoying
             vid = yt(url, use_oauth=True, allow_oauth_cache=True, on_progress_callback=on_progress)
+
+            #If only audio or not checked through the checkbox
             if self.audio.get()==1:
                 ys = vid.streams.get_audio_only()
             else:
@@ -149,7 +163,7 @@ class MAIN:
                 caption.download(output_path=dir)
                 caption.save_captions(title + "_captions.txt")
             except:
-                print("No captions available for this video.")
+                print("No captions available for " + title + ".") 
         
         else:
             url = self.url
@@ -172,7 +186,7 @@ class MAIN:
                     print("No captions available for this video.")
             
 
-
+#old code that used to work but doesn't anymore, left for reference as it might be useful in the future
         """try:
             if self.playlist.get()==0:
                 try:    
@@ -204,6 +218,7 @@ class MAIN:
             print (e)
 """
 
+    #Back function to go back to the main menu (must be a better way)
     def back(self):
         try:
             self.title.pack_forget()
