@@ -1,5 +1,6 @@
-from pytube import YouTube as yt
-from pytube import Playlist
+from pytubefix import YouTube as yt
+from pytubefix import Playlist
+from pytubefix.cli import on_progress
 from tkinter import *
 import tkinter as tk
 import os, sys
@@ -131,7 +132,48 @@ class MAIN:
         self.file.truncate(0)
         self.file.write(self.location.get())
         self.file.close()
-        try:
+        if self.playlist.get()==0:
+            url = self.url
+            dir = self.location.get()
+
+            vid = yt(url, use_oauth=True, allow_oauth_cache=True, on_progress_callback=on_progress)
+            if self.audio.get()==1:
+                ys = vid.streams.get_audio_only()
+            else:
+                ys = vid.streams.get_highest_resolution()
+            ys.download(output_path=dir)
+
+            title = vid.title
+            try:
+                caption = vid.captions['a.en']
+                caption.download(output_path=dir)
+                caption.save_captions(title + "_captions.txt")
+            except:
+                print("No captions available for this video.")
+        
+        else:
+            url = self.url
+            dir = self.location.get()
+
+            pl = Playlist(url)
+            for vid in pl.videos:
+                if self.audio.get()==1:
+                    ys = vid.streams.get_audio_only()
+                else:
+                    ys = vid.streams.get_highest_resolution()
+                ys.download(output_path=dir)
+
+                title = vid.title
+                try:
+                    caption = vid.captions['a.en']
+                    caption.download(output_path=dir)
+                    caption.save_captions(title + ".lrc")
+                except:
+                    print("No captions available for this video.")
+            
+
+
+        """try:
             if self.playlist.get()==0:
                 try:    
                     if self.audio.get()==0:
@@ -160,7 +202,7 @@ class MAIN:
 
         except Exception as e:
             print (e)
-
+"""
 
     def back(self):
         try:
