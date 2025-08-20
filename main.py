@@ -84,7 +84,7 @@ class MAIN:
             dir = self.location
 
             #Added use_oauth and allow_oauth_cache to handle OAuth authentication due to some issues with Youtube API calling for age restrictions but this can be removed if not needed as it is annoying
-            vid = yt(url, use_oauth=True, allow_oauth_cache=True, on_progress_callback=on_progress)
+            vid = yt(url, 'WEB', use_oauth=True, allow_oauth_cache=True, on_progress_callback=on_progress)
 
             #If only audio or not checked through the checkbox
             if self.audio==1:
@@ -108,7 +108,7 @@ class MAIN:
             url = self.url
             dir = self.ddl
 
-            pl = Playlist(url)
+            pl = Playlist(url, 'WEB')
             downloaded = 0
             for vid in pl.videos:
                 #little progress bar I thought was cool
