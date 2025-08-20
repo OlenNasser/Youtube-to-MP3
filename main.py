@@ -2,40 +2,29 @@ from pytubefix import YouTube as yt
 from pytubefix import Playlist
 from pytubefix.cli import on_progress
 from tkinter import *
-import tkinter as tk
 import os, sys
+import streamlit as st
 
 #This is a simple GUI video downloader using pytube(fix) and tkinter
 
 class MAIN:
     def __init__(self):
-        pass
-    def main_c(self):
-        self.ddl = 'c:\\Downloads' 
-        print("Welcome to oBoonkero's Video Downloader!\n")
-        print("Press p or s to select if you want to download a playlist or a single video: ")
-        temp = input() #get input from user
-        if (temp.lower() == 'p'):
-            self.playlist = 1
-        else:
-            self.playlist = 0
+        self.ddl = 'c:\\Downloads'
+    def main_w(self):
+        st.header("oBoonkero's Video Downloader")
 
-        print("Enter the URL of the video/playlist you want to download: ")
-        self.url = input()
-        self.get()
-        print("Would you like audio only? (y/n): ")
-        if (input().lower() == 'y'):
-            self.audio = 1
-        else:
-            self.audio = 0
-        print("Enter the download location (current is " + self.ddl + "press enter to keep): ")
-        loc = input()
-        if loc != '':
-            self.ddl = loc
-        self.download()
-        print("Download complete, press enter to restart or ctrl+c to exit")
-        input()
-        self.main_c()
+        self.playlist = st.toggle("Playlist?")
+        self.url = st.text_input("Enter the URL of the video/playlist you want to download: ")
+
+        st.button("Get Video Info", on_click=self.get)
+
+
+        self.audio = st.toggle("Audio Only?")
+        self.ddl = st.text_input("Enter the download location (current is " + self.ddl + ", press enter to keep): ", value=self.ddl)
+        self.location = self.ddl if self.ddl else os.getcwd() + '\\Downloads'
+
+        st.button("Download", on_click=self.download)
+        
 
 
     
@@ -58,22 +47,20 @@ class MAIN:
         if self.playlist==0:
             try:
                 self.ytu = yt(self.url)
-                print(self.ytu.title + '\n' + str(self.ytu.length))
+                st.write(self.ytu.title + '\n' + str(self.ytu.length))
                 
                 
             except Exception as e:
                 print (e)
-                print("\nInvalid URL\n")
-                self.main_c()
+                st.write("\nInvalid URL\n")
 
         elif self.playlist==1:
             try:
                 self.ytu = Playlist(self.url)
-                print(self.ytu.title + '\n' + str(len(self.ytu.video_urls)) + " videos in playlist")
+                st.write(self.ytu.title + '\n' + str(len(self.ytu.video_urls)) + " videos in playlist")
                 
             except:
-                print("\nInvalid URL (Make sure playlist is public)\n")
-                self.main_c()
+                st.write("\nInvalid URL (Make sure playlist is public)\n")
 
 
         
@@ -94,7 +81,7 @@ class MAIN:
         #Also downloads captions if available (functionality doesn't work on song lyrics as of now)
         if self.playlist==0:
             url = self.url
-            dir = self.location()
+            dir = self.location
 
             #Added use_oauth and allow_oauth_cache to handle OAuth authentication due to some issues with Youtube API calling for age restrictions but this can be removed if not needed as it is annoying
             vid = yt(url, use_oauth=True, allow_oauth_cache=True, on_progress_callback=on_progress)
@@ -104,7 +91,11 @@ class MAIN:
                 ys = vid.streams.get_audio_only()
             else:
                 ys = vid.streams.get_highest_resolution()
-            ys.download(output_path=dir)
+            try:
+                ys.download(output_path=dir)
+                st.write(f"Downloaded: {vid.title} to {dir}")
+            except:
+                st.write("Download failed. Please check the URL or your internet connection.")
 
             title = vid.title
             try:
@@ -125,7 +116,7 @@ class MAIN:
                 progress += "." * downloaded
                 progress += " " * (len(pl.video_urls) - downloaded - 1)
                 progress += f") {downloaded+1}/{len(pl.video_urls)} {vid.title}"
-                print(progress, end='\r', flush=True)
+                st.write(progress, end='\r', flush=True)
                 downloaded += 1
 
                 if self.audio==1:
@@ -147,4 +138,4 @@ class MAIN:
 
 
 main = MAIN()
-main.main_c()
+main.main_w()
