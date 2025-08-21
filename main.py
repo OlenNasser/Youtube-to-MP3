@@ -57,7 +57,7 @@ class MAIN:
         # if the user wants to download a playlist or a single video it will display different information or let user know url is invalid
         if self.playlist==0:
             try:
-                self.ytu = yt(self.url)
+                self.ytu = yt(self.url, use_oauth=True, allow_oauth_cache=True)
                 print(self.ytu.title + '\n' + str(self.ytu.length))
                 
                 
@@ -97,7 +97,7 @@ class MAIN:
             dir = self.location()
 
             #Added use_oauth and allow_oauth_cache to handle OAuth authentication due to some issues with Youtube API calling for age restrictions but this can be removed if not needed as it is annoying
-            vid = yt(url, use_oauth=True, allow_oauth_cache=True, on_progress_callback=on_progress)
+            vid = yt(url, 'WEB', use_oauth=True, allow_oauth_cache=True)
 
             #If only audio or not checked through the checkbox
             if self.audio==1:
@@ -117,7 +117,7 @@ class MAIN:
             url = self.url
             dir = self.ddl
 
-            pl = Playlist(url)
+            pl = Playlist(url, 'WEB', use_oauth=True, allow_oauth_cache=True)
             downloaded = 0
             for vid in pl.videos:
                 #little progress bar I thought was cool
